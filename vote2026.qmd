@@ -1,0 +1,34 @@
+```{r}
+library(data.table)
+library(arrow)
+
+# Bases enxutas geradas por R/00_extrair.R (a partir dos zips em dados_tse/)
+base <- "dados/base"
+rd   <- function(f) as.data.table(read_parquet(file.path(base, f)))
+
+votos  <- rd("votos_secao_2022.parquet")     # turno, uf, mun, zona, secao, nr_votavel, votos
+secoes <- rd("secoes_2022.parquet")          # aptos, comparecimento, abstenções, horário do BU
+nm_mun <- rd("municipios_2022.parquet")      # uf, mun, nm_mun
+
+votos[, cand := fcase(nr_votavel == 13, "lula",
+                      nr_votavel == 22, "bolsonaro",
+                      nr_votavel == 95, "brancos",
+                      nr_votavel == 96, "nulos",
+                      default = "outros")]
+
+id <- c("turno", "uf", "mun", "zona")
+
+# zona: votos por candidato, brancos, nulos + aptos/comparecimento/abstenções dos boletins de urna
+zona <- dcast(votos, turno + uf + mun + zona ~ cand, value.var = "votos", fun.aggregate = sum, fill = 0)
+zona[, validos := lula + bolsonaro + outros]
+zona <- merge(zona, secoes[, .(aptos = sum(aptos), comparecimento = sum(comparecimento),
+                               abstencoes = sum(abstencoes)), by = id], by = id)
+
+# município
+vars <- setdiff(names(zona), id)
+mun  <- zona[, lapply(.SD, sum), by = .(turno, uf, mun), .SDcols = vars]
+mun  <- merge(nm_mun, mun, by = c("uf", "mun"), all.y = TRUE)
+
+# conferência com o resultado oficial (1º turno: Lula 57.259.504; Bolsonaro 51.072.345)
+mun[, lapply(.SD, sum), by = turno, .SDcols = vars]
+```

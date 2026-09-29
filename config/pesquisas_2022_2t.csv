@@ -1,0 +1,7 @@
+# Pesquisas finais do 2º turno de 2022 (prior do replay). Coluna do PL = bolsonaro. OUTROS = 0.
+# Fontes: Datafolha 52 x 48 e Quaest 52 x 48 nos válidos (Congresso em Foco, Brasil de Fato).
+instituto,campo_inicio,campo_fim,amostra,registro,lula,bolsonaro,outros,brancos_nulos,indecisos,base
+Datafolha,,2022-10-29,,,52,48,0,,,validos
+Quaest,,2022-10-29,,,52,48,0,,,validos
+# Ipec 29/10: 51% de Lula nos votos totais; nos válidos a confirmar (54 x 46?)
+# AtlasIntel: a confirmar

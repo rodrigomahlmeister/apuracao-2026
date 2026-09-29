@@ -1,0 +1,18 @@
+turno: 1
+n_pesquisas: 3
+institutos:
+- Datafolha
+- Quaest
+- Ipec
+media_validos:
+  PT: 0.5
+  PL: 0.37
+  OUTROS: 0.13
+dp_validos:
+  PT: 0.03
+  PL: 0.03
+  OUTROS: 0.03
+log_ratios:
+  PT_OUTROS: 1.34707
+  PL_OUTROS: 1.04597
+gerado_em: 2026-09-28 03:22

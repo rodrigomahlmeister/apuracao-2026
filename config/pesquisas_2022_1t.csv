@@ -1,0 +1,7 @@
+# Pesquisas finais do 1º turno de 2022 (prior do replay). Coluna do PL = bolsonaro.
+# Fontes: Datafolha e Quaest (números passados pelo usuário); Ipec 29/09-01/10 (Sul21, InfoMoney, CNN Brasil).
+instituto,campo_inicio,campo_fim,amostra,registro,lula,bolsonaro,outros,brancos_nulos,indecisos,base
+Datafolha,,2022-10-01,,,50,36,14,,,validos
+Quaest,,2022-10-01,,,49,38,13,,,validos
+Ipec,2022-09-29,2022-10-01,3008,,51,37,12,,,validos
+# AtlasIntel: fontes divergem (50,7/41 ou 48,3/41 nos válidos); preencher após conferir

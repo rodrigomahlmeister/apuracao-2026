@@ -1,0 +1,6 @@
+{
+  // Página da apuração: Cloudflare Workers com arquivos estáticos (pasta site/). Publicar: npx wrangler deploy
+  "name": "apuracao-2026",
+  "compatibility_date": "2026-09-26",
+  "assets": { "directory": "site" }
+}

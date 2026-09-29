@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apuração com projeção · Presidente 2026</title>
+  <meta name="description" content="Apuração do TSE com projeção do resultado final, atualizada a cada ciclo.">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="pagina">
+    <header class="topo">
+      <p class="sobretitulo" id="eleicao">Eleições 2026 · Presidente · 1º turno</p>
+      <h1>Apuração com projeção do resultado final</h1>
+      <p class="autoria">por <a href="https://rodrigomahlmeister.com">Rodrigo Mahlmeister</a></p>
+      <p class="status" id="status" aria-live="polite">Carregando…</p>
+      <p class="aviso" id="aviso" hidden></p>
+    </header>
+
+    <section class="cartoes" id="cartoes" aria-label="Projeção por candidato"></section>
+
+    <section class="painel">
+      <div class="painel-topo">
+        <div class="legenda" id="legenda" aria-label="Legenda"></div>
+        <p class="p2t" id="p2t"></p>
+      </div>
+      <div class="grafico" id="grafico" role="img" aria-label="Evolução da apuração e da projeção: Lula e Flávio Bolsonaro"></div>
+      <p class="subpainel">Outros candidatos (soma)</p>
+      <div class="grafico" id="grafico-outros" role="img" aria-label="Evolução da apuração e da projeção: outros candidatos"></div>
+      <p class="nota-eixo">Eixo horizontal: % do eleitorado nas seções já totalizadas pelo TSE.</p>
+    </section>
+
+    <details class="tabela">
+      <summary>Ver os dados em tabela</summary>
+      <div class="tabela-rolagem"><table id="tabela"></table></div>
+    </details>
+
+    <section class="metodo">
+      <h2>Como a projeção é feita</h2>
+      <p>O ponto de partida é o resultado de 2022 em cada local de votação, levado aos locais de 2026. O arquivo de seções
+        do TSE informa quais seções de cada município já foram totalizadas; comparando os votos apurados com o resultado
+        anterior dessas mesmas seções, o modelo estima a mudança de cada candidato desde 2022 e a aplica às seções que
+        faltam. A faixa mostra o intervalo de 90%, calibrado na reprodução da apuração de 2022.
+        A projeção aparece a partir de 2% do eleitorado apurado.</p>
+    </section>
+
+    <footer class="rodape">
+      <span>Dados: TSE (divulgação de resultados).</span>
+      <span>Rodrigo Mahlmeister · <a href="https://rodrigomahlmeister.com">rodrigomahlmeister.com</a></span>
+    </footer>
+  </main>
+  <div class="dica" id="dica" role="tooltip" hidden></div>
+</body>
+</html>

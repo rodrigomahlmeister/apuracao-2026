@@ -1,0 +1,16 @@
+turno: 2
+n_pesquisas: 2
+institutos:
+- Datafolha
+- Quaest
+media_validos:
+  PT: 0.52
+  PL: 0.48
+  OUTROS: 0.0
+dp_validos:
+  PT: 0.03
+  PL: 0.03
+  OUTROS: 0.03
+log_ratios:
+  PT_PL: 0.08004
+gerado_em: 2026-09-28 03:22

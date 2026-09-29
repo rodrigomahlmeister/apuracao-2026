@@ -1,0 +1,6 @@
+# Pesquisas finais para o prior (Presidente 2026, 1º turno). Uma linha por pesquisa. Linhas com # são ignoradas.
+# lula, flavio, outros, brancos_nulos, indecisos em % (vírgula ou ponto decimal). base = "totais" ou "validos".
+# Em base "totais", brancos/nulos e indecisos são excluídos e o resto é reescalado para somar 100 (válidos).
+# Depois de editar: Rscript R/pesquisas.R   (gera config/prior.yaml; opcional: sem ele o prior é swing zero)
+instituto,campo_inicio,campo_fim,amostra,registro,lula,flavio,outros,brancos_nulos,indecisos,base
+# Exemplo,2026-10-01,2026-10-03,2000,BR-00000/2026,45,35,12,5,3,totais

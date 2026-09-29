@@ -1,0 +1,20 @@
+# Parâmetros da apuração. Códigos de eleição e pleito vêm do ele-c.json do ambiente escolhido.
+ambiente: oficial          # oficial | simulado (pode ser trocado na linha de comando)
+
+ambientes:
+  simulado:
+    raiz: https://resultados-sim.tse.jus.br/simulado/simulado2026   # = "<base>/<ambiente>" do ele-c
+  oficial:
+    raiz: https://resultados.tse.jus.br/oficial
+
+ciclo_eleicao: ele2026
+
+http:
+  req_por_seg: 40   # limite do TSE: 100/s por IP (bloqueio de 10 min)
+  max_ativos: 20    # requisições simultâneas
+  timeout_s: 30
+  tentativas: 4     # só 5xx e falhas de rede; 429/403 nunca
+
+ciclo:
+  intervalo_min: 2      # tempo mínimo entre inícios de ciclo
+  fatia_rotativa: 5     # a cada ciclo, 1/5 dos municípios é baixado mesmo sem andamento novo (com ETag)

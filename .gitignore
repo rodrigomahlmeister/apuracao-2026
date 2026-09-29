@@ -1,0 +1,14 @@
+# dados pesados (baixados do TSE ou gerados; recriáveis pelos scripts de preparo/)
+dados/
+dados_tse/
+saida/
+# PDFs soltos na raiz (referências pessoais); a documentação do TSE fica em docs/
+/*.pdf
+# ferramentas
+.wrangler/
+node_modules/
+.quarto/
+.Rhistory
+.RData
+.Rproj.user/
+.claude/

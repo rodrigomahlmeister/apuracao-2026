@@ -1,0 +1,30 @@
+# Mapeamento candidato (NR_VOTAVEL) -> bloco, por eleição. Quem não está listado vai para OUTROS.
+# Brancos (95) e nulos (96) nunca entram em bloco.
+eleicoes:
+  "2018":
+    PT: [13]
+    PL: [17]      # Bolsonaro (PSL)
+  "2022":
+    PT: [13]
+    PL: [22]      # Bolsonaro (PL)
+  "2026":
+    PT: [13]
+    PL: [22]      # Flávio Bolsonaro (PL)
+  "simulado":     # só para testar o encanamento no simulado (candidatos fictícios)
+    PT: [89]
+    PL: [68]
+
+candidatos:               # nomes exibidos na página
+  - {bloco: PT, nome: Lula, partido: PT}
+  - {bloco: PL, nome: Flávio, partido: PL}
+  - {bloco: OUTROS, nome: Outros, partido: ""}
+
+rotulos:
+  PT: "Lula (PT)"
+  PL: "Flávio (PL)"
+  OUTROS: "Outros"
+
+cores:
+  PT: "#FF0000"
+  PL: "#000000"
+  OUTROS: "#808080"
