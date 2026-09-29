@@ -306,3 +306,16 @@ Swing estimado pela parte apurada de cada município (`unidades = "apurado"`), b
 - Página estática em `site/` (HTML + CSS + D3), lê `site/dados/apuracao.json` (escrito por `R/pagina.R` a cada ciclo, com troca atômica). Cartões com projeção final, faixa e apurado; gráfico principal (Lula × PL) e painel de Outros com o mesmo eixo x; tabela; modo claro/escuro; cruz com dica.
 - **Trajetória projetada** (`trajetoria()` em `R/modelo.R`): a parte pendente de cada UF chega no ritmo recente dela (fração do eleitorado da UF apurada por minuto nos últimos 15 min; `ritmo_uf()`); municípios pendentes da UF avançam juntos; sem ritmo medido, todas as UFs no mesmo passo. Dá o caminho do % apurado até 100%, que termina na projeção final. A página desenha o caminho pontilhado com a faixa abrindo até a faixa final. O ponto final é robusto; o formato do caminho depende da ordem suposta. Replay 2022 1T, aos 27,5% apurado: virada prevista em ~58% (real: ~67%).
 - `R/replay_2022.R`: replay "como se fosse a eleição", montando com dados de 2022 os arquivos do TSE a cada instante e rodando o mesmo código da noite (base 2018 → seções de 2022: `preparo/04_base_replay2022.R`). Com o código de produção: 1T projeção a 2,5% apurado 48,72 / 42,96; a 8,6%, 48,47 / 43,15 (real 48,43 / 43,20).
+
+## Refinamentos testados e descartados (28/09)
+Replay 2022 com código de produção, passo de 5 min, a partir de 2% apurado (`estudos/teste_refinos.R`; tabelas em `docs/teste_refinos_t{1,2}.csv`). Erro absoluto médio (p.p.; 1T = média PT/PL, 2T = PT):
+
+| | 1T médio | 1T 5–50% apurado | 2T médio |
+|---|---|---|---|
+| atual (swing previsto pelo perfil do município) | **0,039** | 0,025–0,041 | 0,030 |
+| + resíduo próprio do município (κ = 5k / 20k / 100k eleitores) | 0,056 / 0,054 / 0,047 | pior | 0,040 / 0,040 / 0,037 |
+| seção a seção, swing do perfil da seção | 0,064 | 0,15–0,28 | 0,016 |
+| seção a seção, swing do perfil do município | 0,159 | 0,37–0,61 | 0,019 |
+
+- Resíduo próprio: piora nos dois turnos. O swing observado na parte apurada de um município carrega composição interna (quais bairros chegaram primeiro) que não vale para a parte pendente.
+- Seção a seção: ganho pequeno no 2T (−0,01 a −0,015 p.p., um único replay), perda grande no 1T entre 5% e 50% apurado. Com três blocos, a razão log por seção (contagens pequenas, Outros disperso em 2018) é ruidosa e o softmax por seção introduz viés. Mantido o município como unidade nos dois turnos.
