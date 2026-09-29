@@ -13,7 +13,10 @@ suppressPackageStartupMessages({ library(data.table); library(arrow); library(ya
 
 PAR_MOD <- list(kappa_reg = 30, kappa_uf = 30, kappa_taxa = 20, min_n = 8, B = 100,
                 faixa_f_ini = 0.02, faixa_k_ini = 3, faixa_k = 0.7, faixa_piso = 4e-4,
-                prior_dp = 0.04, mostrar_a_partir = 0.02)
+                prior_dp = 0.04, mostrar_a_partir = 0.02,
+                # refinamentos em teste (desligados): resíduo próprio do município levado à parte pendente com peso
+                # n_apurado / (n_apurado + residuo_kappa) [eleitores]; projeção seção a seção da parte pendente
+                residuo_kappa = NA_real_, por_secao = FALSE)
 
 sm <- function(x) x + 0.5
 lr <- function(a, b) log(sm(a) / sm(b))
@@ -73,7 +76,8 @@ estado <- function(ciclo, base, blocos) {
     csp <- unique(cs[is.na(nsp), .(uf = toupper(uf), mun = as.integer(mun), zona = as.integer(zona),
                                   secao_cs = as.integer(secao), tem = !is.na(ha))])
     x <- merge(csp, bsec, by = c("uf", "mun", "zona", "secao_cs"), all.x = TRUE)
-    bc <- c("b_comp", "b_val", "b_PT", "b_PL", "b_OU")
+    bc <- c("b_comp", "b_val", "b_PT", "b_PL", "b_OU", "eleitores")
+    x[, (bc) := lapply(.SD, as.numeric), .SDcols = bc]
     x[, (bc) := lapply(.SD, \(v) fcoalesce(v, mean(v, na.rm = TRUE))), by = mun, .SDcols = bc]
     x <- merge(x[!is.na(b_comp)], m[, .(mun, n_u = st)], by = "mun")
     x[, `:=`(n_c = sum(tem), n = .N), by = mun]
@@ -85,12 +89,20 @@ estado <- function(ciclo, base, blocos) {
     for (k in c("comp", "val", "PT", "PL", "OU")) {
       col <- paste0("bp_", k); set(m, j = col, value = fcoalesce(m[[col]], 0) * m$aptos / m$aptos_base * fifelse(m$completo, 0, 1))
     }
+    # parte pendente seção a seção (usada quando PAR_MOD$por_secao), na mesma escala da base municipal
+    esc <- m[completo == FALSE, .(mun, f = aptos / aptos_base)]
+    pend_sec <- merge(x[w < 1, .(mun, ap = eleitores * (1 - w), bp_comp = b_comp * (1 - w), bp_val = b_val * (1 - w),
+                                 bp_PT = b_PT * (1 - w), bp_PL = b_PL * (1 - w), bp_OU = b_OU * (1 - w))], esc, by = "mun")
+    for (k in c("ap", "bp_comp", "bp_val", "bp_PT", "bp_PL", "bp_OU")) set(pend_sec, j = k, value = pend_sec[[k]] * pend_sec$f)
   } else {                                                       # sem arquivo de seções: pendente proporcional
     g <- pmax(m$aptos - m$aptos_obs, 0) / m$aptos
     for (k in c("comp", "val", "PT", "PL", "OU")) set(m, j = paste0("bp_", k), value = m[[paste0("bt_", k)]] * g)
     m[, dessinc := NA]
+    pend_sec <- NULL
   }
-  merge(m, base$mun, by = c("uf", "mun"), all.x = TRUE)[is.na(elegivel), elegivel := FALSE][is.na(regiao), regiao := "ZZ"]
+  m <- merge(m, base$mun, by = c("uf", "mun"), all.x = TRUE)[is.na(elegivel), elegivel := FALSE][is.na(regiao), regiao := "ZZ"]
+  setattr(m, "pend_sec", pend_sec)
+  m
 }
 
 # ---- estimação e projeção ---------------------------------------------------------------------------------------
@@ -149,7 +161,13 @@ estimar <- function(m, turno, prior, centro, peso = NULL, sortear_prior = FALSE,
   taxas <- merge(data.table(uf = unique(m$uf)), taxas, by = "uf", all.x = TRUE)
   taxas[is.na(r_comp), `:=`(r_comp = rn[["comp"]], r_val = rn[["val"]])]
   m[, pb := NULL]
-  list(coefs = coefs, taxas = taxas, n_unidades = nrow(C), turno = turno)
+  # resíduo de cada município na parte apurada (swing observado - previsto pelos coeficientes da UF)
+  resid <- data.table(mun = C$mun, n = C$aptos_obs)
+  for (k in seq_along(coefs)) {
+    B <- coefs[[k]][match(C$uf, rownames(coefs[[k]])), , drop = FALSE]
+    set(resid, j = paste0("r", k), value = Y[, k] - rowSums(cbind(1, X) * B))
+  }
+  list(coefs = coefs, taxas = taxas, n_unidades = nrow(C), turno = turno, resid = resid)
 }
 
 # detalhe = TRUE devolve também a parte pendente projetada de cada município (para a trajetória)
@@ -161,8 +179,21 @@ projetar <- function(m, est, centro, detalhe = FALSE) {
     tot <- c(obs[c("PT", "PL", "OU")] / obs[["val"]], validos = obs[["val"]])
     return(if (detalhe) list(total = tot, obs = obs, pend = data.table()) else tot)
   }
+  P[, ap := aptos - aptos_obs]
   X <- X_de(P$bp_PT, P$bp_PL, P$bp_OU, P$aptos, tn, centro)
   sw <- matrix(sapply(est$coefs, \(B) rowSums(cbind(1, X) * B[match(P$uf, rownames(B)), , drop = FALSE])), nrow = nrow(P))
+  ps <- attr(m, "pend_sec")
+  if (isTRUE(PAR_MOD$por_secao) && !is.null(ps) && nrow(ps)) {      # swing do perfil do município, aplicado seção a seção
+    ps <- ps[bp_comp > 0 & mun %in% P$mun]
+    i <- match(ps$mun, P$mun)
+    sw <- sw[i, , drop = FALSE]
+    P <- cbind(ps, P[i, .(uf, aptos, r_comp, r_val)])
+  }
+  if (is.finite(PAR_MOD$residuo_kappa) && !is.null(est$resid) && nrow(est$resid)) {   # resíduo próprio, encolhido
+    r <- est$resid[match(P$mun, est$resid$mun)]
+    w <- fcoalesce(r$n / (r$n + PAR_MOD$residuo_kappa), 0)
+    for (k in seq_len(ncol(sw))) sw[, k] <- sw[, k] + w * fcoalesce(r[[paste0("r", k)]], 0)
+  }
   val <- P$bp_comp * P$r_comp * (P$bp_val / P$bp_comp) * P$r_val
   if (tn == 1) {
     e1 <- lr(P$bp_PT, P$bp_OU) + sw[, 1]; e2 <- lr(P$bp_PL, P$bp_OU) + sw[, 2]
@@ -171,7 +202,7 @@ projetar <- function(m, est, centro, detalhe = FALSE) {
   tot <- obs + c(PT = sum(val * sPT), PL = sum(val * sPL), OU = sum(val * (1 - sPT - sPL)), val = sum(val))
   res <- c(tot[c("PT", "PL", "OU")] / tot[["val"]], validos = tot[["val"]])
   if (!detalhe) return(res)
-  list(total = res, obs = obs, pend = data.table(uf = P$uf, aptos_pend = P$aptos - P$aptos_obs, val = val,
+  list(total = res, obs = obs, pend = data.table(uf = P$uf, aptos_pend = P$ap, val = val,
                                                   PT = val * sPT, PL = val * sPL, OU = val * (1 - sPT - sPL)))
 }
 
