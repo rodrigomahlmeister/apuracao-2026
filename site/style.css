@@ -121,3 +121,7 @@ body {
   .legenda { gap: 4px 12px; font-size: 12px; }
 }
 .aviso { margin: 12px 0 0; padding: 8px 12px; border-radius: 8px; font-size: 14px; color: var(--texto); background: var(--superficie); border: 1px solid var(--borda); border-left: 3px solid var(--texto-3); }
+.metodo p { margin: 0 0 10px; }
+.metodo p strong { color: var(--texto); font-weight: 600; }
+.metodo .links { font-size: 14px; color: var(--texto-3); }
+.metodo a { color: var(--texto-2); text-underline-offset: 3px; }

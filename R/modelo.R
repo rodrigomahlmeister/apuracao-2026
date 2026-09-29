@@ -11,7 +11,7 @@
 # proporções projetadas. Faixa de 90%: bootstrap dos municípios + calibração no replay de 2022.
 suppressPackageStartupMessages({ library(data.table); library(arrow); library(yaml) })
 
-PAR_MOD <- list(kappa_reg = 30, kappa_uf = 30, kappa_taxa = 20, min_n = 8, B = 200,
+PAR_MOD <- list(kappa_reg = 30, kappa_uf = 30, kappa_taxa = 20, min_n = 8, B = 100,
                 faixa_f_ini = 0.02, faixa_k_ini = 3, faixa_k = 0.7, faixa_piso = 4e-4,
                 prior_dp = 0.04, mostrar_a_partir = 0.02)
 
@@ -222,6 +222,7 @@ projetar_faixa <- function(m, turno, prior, centro, B = PAR_MOD$B) {
   k <- if (f < PAR_MOD$faixa_f_ini) PAR_MOD$faixa_k_ini else PAR_MOD$faixa_k
   pt <- matrix(ponto[c("PT", "PL", "OU")], nrow(reps), 3, byrow = TRUE)
   reps <- pt + k * (reps - pt) + matrix(rnorm(length(reps), 0, PAR_MOD$faixa_piso / qnorm(0.95)), nrow(reps))
+  reps <- pmin(pmax(reps, 0), 1)                  # com quase nada apurado a inflação pode sair de [0, 1]
   q <- apply(reps, 2, quantile, probs = c(0.05, 0.95))
   out <- data.table(bloco = c("PT", "PL", "OUTROS"), proj = ponto[c("PT", "PL", "OU")], lo = q[1, ], hi = q[2, ],
                     p_2turno = mean(apply(reps, 1, max) < 0.5), pct_apurado = 100 * f, unidades = est$n_unidades)

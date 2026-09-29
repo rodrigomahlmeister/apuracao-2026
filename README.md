@@ -1,5 +1,7 @@
 # Apuração com projeção — Presidente 2026
 
+Página: https://projecao.2026elections.workers.dev · Método: [docs/metodo.md](docs/metodo.md)
+
 Na noite da eleição, um único comando coleta os arquivos de divulgação do TSE, projeta o resultado final com
 faixa de 90% e grava o que a página exibe.
 

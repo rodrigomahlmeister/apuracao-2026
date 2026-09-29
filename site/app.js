@@ -3,7 +3,7 @@
 "use strict";
 
 const ARQ = "dados/apuracao.json";
-const INTERVALO_MS = 60000;
+const INTERVALO_MS = 30000;
 const BLOCOS = ["PT", "PL", "OUTROS"];
 const fmt = (v, d = 1) => (v == null ? "–" : v.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d }));
 const cor = (b) => getComputedStyle(document.documentElement).getPropertyValue(`--s-${b}`).trim();
@@ -20,7 +20,7 @@ async function carregar() {
     dados = await r.json();
     if (pontosVisiveis === null) desenhar(dados.pontos);
   } catch (e) {
-    document.getElementById("status").textContent = "Não foi possível carregar os dados agora; nova tentativa em 1 minuto.";
+    document.getElementById("status").textContent = "Não foi possível carregar os dados agora; nova tentativa em 30 segundos.";
   }
 }
 

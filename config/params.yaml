@@ -16,5 +16,5 @@ http:
   tentativas: 4     # só 5xx e falhas de rede; 429/403 nunca
 
 ciclo:
-  intervalo_min: 2      # tempo mínimo entre inícios de ciclo
+  intervalo_min: 1      # tempo mínimo entre inícios de ciclo (ciclo incremental leva ~40–70 s)
   fatia_rotativa: 5     # a cada ciclo, 1/5 dos municípios é baixado mesmo sem andamento novo (com ETag)

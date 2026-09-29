@@ -38,12 +38,27 @@
     </details>
 
     <section class="metodo">
-      <h2>Como a projeção é feita</h2>
-      <p>O ponto de partida é o resultado de 2022 em cada local de votação, levado aos locais de 2026. O arquivo de seções
-        do TSE informa quais seções de cada município já foram totalizadas; comparando os votos apurados com o resultado
-        anterior dessas mesmas seções, o modelo estima a mudança de cada candidato desde 2022 e a aplica às seções que
-        faltam. A faixa mostra o intervalo de 90%, calibrado na reprodução da apuração de 2022.
-        A projeção aparece a partir de 2% do eleitorado apurado.</p>
+      <h2>Método</h2>
+      <p><strong>Dados.</strong> A cada minuto são lidos os arquivos da divulgação do TSE: andamento por UF e município,
+        resultado por município (só candidaturas com destinação válida) e a configuração de seções, cujo horário do
+        arquivo auxiliar identifica as seções já totalizadas. Divergências entre a configuração de seções e o resultado
+        municipal são reconciliadas proporcionalmente.</p>
+      <p><strong>Base.</strong> Cada seção de 2026 recebe o resultado de 2022 do seu local de votação. Os locais são pareados
+        por uma cascata de critérios geográficos (mesma chave com CEP ou distância &lt; 200 m, mesmo prédio &lt; 100 m, vizinhos
+        ponderados por eleitorado/distância, zona, município); 93% do eleitorado tem pareamento exato.</p>
+      <p><strong>Modelo.</strong> Em cada município, o swing é a diferença, em razões log (PT/Outros e PL/Outros), entre o
+        apurado e a base das seções apuradas. Uma regressão ponderada relaciona o swing ao perfil de voto da base e ao
+        porte do município, com coeficientes hierárquicos Brasil → região → UF e encolhimento empírico-bayesiano; o
+        intercepto nacional tem um prior (pesquisas finais ou swing nulo). As seções pendentes recebem sua base mais o
+        swing previsto pelo seu próprio perfil, com comparecimento e taxa de válidos ajustados pela UF.</p>
+      <p><strong>Incerteza e trajetória.</strong> A faixa de 90% vem de bootstrap dos municípios, calibrada na reprodução
+        da apuração de 2022; a probabilidade de 2º turno é a fração das réplicas em que ninguém passa de 50% dos válidos.
+        A linha pontilhada supõe que cada UF continua no ritmo de apuração dos últimos 15 minutos.</p>
+      <p><strong>Validação.</strong> Reproduzindo 2022 na ordem real de chegada dos boletins, o erro da projeção ficou abaixo
+        de 0,5 p.p. a partir de ~1% do eleitorado apurado no 1º turno e ~3% no 2º, contra 98% e 88% do percentual
+        apurado bruto. A projeção aparece a partir de 2% apurado.</p>
+      <p class="links">Método completo: <a href="https://github.com/rodrigomahlmeister/apuracao-2026/blob/main/docs/metodo.md">docs/metodo.md</a> ·
+        código: <a href="https://github.com/rodrigomahlmeister/apuracao-2026">github.com/rodrigomahlmeister/apuracao-2026</a></p>
     </section>
 
     <footer class="rodape">
