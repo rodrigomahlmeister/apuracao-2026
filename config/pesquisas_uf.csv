@@ -1,8 +1,7 @@
-# Pesquisas estaduais para Presidente 2026 (tabela "desempenho das pesquisas por estado"). Uma linha por pesquisa;
-# com mais de uma pesquisa na UF, a página usa a média simples. Linhas com # são ignoradas.
-# lula, flavio, outros (SOMA de todos os demais candidatos; no 2º turno deixe vazio), brancos_nulos, indecisos em %
-# (vírgula ou ponto decimal). base = "totais" (como divulgado) ou "validos". A conversão para válidos exclui
-# brancos/nulos e indecisos e reescala lula + flavio + outros para 100.
+# Pesquisas estaduais para Presidente 2026 (tabela "desempenho das pesquisas por estado"). Uma linha por UF.
+# lula, flavio, outros em % como divulgado (votos totais); outros = SOMA de todos os demais candidatos
+# (no 2º turno, deixe vazio). Vírgula ou ponto decimal. Brancos, nulos e indecisos não entram: o código converte
+# para votos válidos dividindo por lula + flavio + outros. Com mais de uma linha na mesma UF, usa a média.
 # Pode ser editado com a apuração rodando: o arquivo é relido a cada ciclo.
-uf,instituto,campo_inicio,campo_fim,amostra,registro,lula,flavio,outros,brancos_nulos,indecisos,base
-# SP,Exemplo,2026-10-01,2026-10-03,1500,SP-00000/2026,40,38,12,6,4,totais
+uf,lula,flavio,outros
+# SP,40,38,12

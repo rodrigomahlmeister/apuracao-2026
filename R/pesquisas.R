@@ -13,14 +13,15 @@ ler_pesquisas <- function(arq) {
   if (is.na(pl)) stop("falta a coluna do candidato do PL (flavio/bolsonaro/pl)")
   d[, `:=`(PT = num(lula), PL = num(get(pl)), OUTROS = num(outros))]
   d[is.na(OUTROS), OUTROS := 0]
-  if (!all(tolower(d$base) %in% c("totais", "validos"))) stop("base deve ser 'totais' ou 'validos'")
+  if ("base" %in% names(d) && !all(tolower(d$base) %in% c("totais", "validos", ""))) stop("base deve ser 'totais' ou 'validos'")
   # válidos: exclui brancos/nulos e indecisos e reescala (vale para as duas bases)
   d[, tot := PT + PL + OUTROS]
   d[, `:=`(PT = PT / tot, PL = PL / tot, OUTROS = OUTROS / tot)]
   d[]
 }
 
-# Pesquisas estaduais (config/pesquisas_uf.csv, mesmo esquema + coluna uf): média simples por UF, em válidos.
+# Pesquisas estaduais (config/pesquisas_uf.csv: uf, lula, flavio, outros; colunas extras são ignoradas):
+# média simples por UF, em válidos.
 # Lida a cada ciclo da noite; arquivo ausente, vazio ou com erro -> NULL (a tabela da página sai sem a diferença).
 pesquisas_uf <- function(arq = "config/pesquisas_uf.csv") {
   if (!file.exists(arq) || sum(!grepl("^[[:space:]]*(#|$)", readLines(arq, warn = FALSE))) < 2) return(NULL)   # só cabeçalho
