@@ -29,7 +29,8 @@ candidato do PT, candidato do PL, demais). Os locais de 2026 são pareados aos d
 1. mesma chave (município, zona, número do local), confirmada por CEP igual ou distância < 200 m;
 2. mesmo prédio sob outra chave: distância < 100 m (ou, sem coordenadas, CEP de 8 dígitos exclusivo daquele local nos dois anos);
 3. vizinhos: média dos 5 locais de 2022 mais próximos (raio de 3 km), ponderada por eleitorado / distância;
-4. zona eleitoral de 2022; 5. município de 2022.
+4. zona eleitoral de 2022;
+5. 5. município de 2022.
 
 Locais cujo eleitorado mudou mais de 50% e locais do nível 2 recebem base mista (histórico próprio e vizinhos, pesos
 calibrados em 2018 → 2022). Coordenadas ausentes na base são herdadas do mesmo local (mesma chave e CEP) nos cadastros
