@@ -1,0 +1,30 @@
+# TESTE SINTÉTICO (não são pesquisas reais): resultado final de 2022 por UF + erro médio das pesquisas nacionais
+# de 2022 (Lula +1,5 p.p.; Bolsonaro -5 p.p.) + ruído N(0, 2 p.p.), semente 2022. Usado só pelo replay (R/replay_2022.R).
+uf,instituto,campo_inicio,campo_fim,amostra,registro,lula,bolsonaro,outros,brancos_nulos,indecisos,base
+AC,sintetico,"",2022-10-01,"","",33,58,9,"","",validos
+AL,sintetico,"",2022-10-01,"","",56,30,14,"","",validos
+AM,sintetico,"",2022-10-01,"","",49,37,14,"","",validos
+AP,sintetico,"",2022-10-01,"","",44,39,17,"","",validos
+BA,sintetico,"",2022-10-01,"","",71,21,8,"","",validos
+CE,sintetico,"",2022-10-01,"","",62,17,21,"","",validos
+DF,sintetico,"",2022-10-01,"","",36,46,18,"","",validos
+ES,sintetico,"",2022-10-01,"","",42,46,12,"","",validos
+GO,sintetico,"",2022-10-01,"","",43,49,8,"","",validos
+MA,sintetico,"",2022-10-01,"","",71,23,6,"","",validos
+MG,sintetico,"",2022-10-01,"","",52,39,9,"","",validos
+MS,sintetico,"",2022-10-01,"","",40,48,12,"","",validos
+MT,sintetico,"",2022-10-01,"","",34,55,11,"","",validos
+PA,sintetico,"",2022-10-01,"","",54,35,11,"","",validos
+PB,sintetico,"",2022-10-01,"","",66,26,8,"","",validos
+PE,sintetico,"",2022-10-01,"","",67,23,10,"","",validos
+PI,sintetico,"",2022-10-01,"","",74,12,14,"","",validos
+PR,sintetico,"",2022-10-01,"","",36,50,14,"","",validos
+RJ,sintetico,"",2022-10-01,"","",44,45,11,"","",validos
+RN,sintetico,"",2022-10-01,"","",66,27,7,"","",validos
+RO,sintetico,"",2022-10-01,"","",31,59,10,"","",validos
+RR,sintetico,"",2022-10-01,"","",25,62,13,"","",validos
+RS,sintetico,"",2022-10-01,"","",46,45,9,"","",validos
+SC,sintetico,"",2022-10-01,"","",33,61,6,"","",validos
+SE,sintetico,"",2022-10-01,"","",65,26,9,"","",validos
+SP,sintetico,"",2022-10-01,"","",41,43,16,"","",validos
+TO,sintetico,"",2022-10-01,"","",53,41,6,"","",validos

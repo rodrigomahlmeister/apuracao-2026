@@ -4,8 +4,9 @@ suppressPackageStartupMessages({ library(data.table); library(jsonlite); library
 
 # serie: data.table longa com hora (POSIXct), pestn (0-100), bloco, apurado, proj, lo, hi, p_2turno (proporções)
 # traj: trajetória projetada do ciclo atual (x, PT, PL, OU em proporção), ou NULL
+# estados: projeção por UF (projetar_uf) e pesq_uf: média das pesquisas por UF (pesquisas_uf), ou NULL
 # preliminar: projeção pontual abaixo de 2% apurado (vetor nomeado PT, PL, OUTROS, proporções), exibida só como número fraco
-escrever_pagina <- function(serie, eleicao, turno, ambiente, traj = NULL, preliminar = NULL, arq = "site/dados/apuracao.json",
+escrever_pagina <- function(serie, eleicao, turno, ambiente, traj = NULL, preliminar = NULL, estados = NULL, pesq_uf = NULL, arq = "site/dados/apuracao.json",
                             candidatos = read_yaml("config/blocos.yaml")$candidatos, tz = "America/Sao_Paulo") {
   w <- dcast(serie, hora + pestn ~ bloco, value.var = c("apurado", "proj", "lo", "hi", "p_2turno"))[order(hora)]
   r <- function(v) round(100 * v, 2)
@@ -22,6 +23,12 @@ escrever_pagina <- function(serie, eleicao, turno, ambiente, traj = NULL, prelim
               projecao_preliminar = if (!is.null(preliminar)) as.list(r(preliminar[c("PT", "PL", "OUTROS")])),
               trajetoria = if (!is.null(traj) && nrow(traj)) lapply(seq_len(nrow(traj)), \(i) with(traj[i],
                 list(x = round(x, 2), PT = r(PT), PL = r(PL), OUTROS = r(OU)))))
+  if (!is.null(estados) && nrow(estados)) {
+    e <- if (is.null(pesq_uf)) copy(estados)[, `:=`(qPT = NA_real_, qPL = NA_real_)]
+         else merge(estados, pesq_uf[, .(uf, qPT = PT, qPL = PL)], by = "uf", all.x = TRUE)
+    out$estados <- lapply(seq_len(nrow(e)), \(i) with(e[i], list(uf = uf, x = round(100 * f, 1), PT = r(PT), PL = r(PL),
+      pesquisa = if (!is.na(qPT)) list(PT = r(qPT), PL = r(qPL)))))
+  }
   dir.create(dirname(arq), recursive = TRUE, showWarnings = FALSE)
   tmp <- paste0(arq, ".tmp")                                     # troca atômica: a página nunca lê arquivo pela metade
   write_json(out, tmp, auto_unbox = TRUE, null = "null", digits = NA)

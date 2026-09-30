@@ -40,6 +40,7 @@ function desenhar(pontos) {
   legenda();
   grafico(pontos);
   tabela(pontos);
+  estados();
 }
 
 function cabecalho(ult, comProj) {
@@ -266,6 +267,46 @@ function tabela(pontos) {
     tr.append(el("td", null, p.t), el("td", null, fmt(p.x, 1)));
     for (const b of BLOCOS) tr.append(el("td", null, fmt(p.apurado[b])));
     for (const b of BLOCOS) tr.append(el("td", null, p.projecao ? `${fmt(p.projecao[b])} (${fmt(p.faixa[b][0])}–${fmt(p.faixa[b][1])})` : "–"));
+    tb.append(tr);
+  }
+  t.append(tb);
+}
+
+// Desempenho das pesquisas por estado: projeção de cada candidato na UF e, entre parênteses, a diferença para a
+// média das pesquisas no estado. Célula tingida na cor do candidato quando ele supera a pesquisa (de 1 a 5 p.p.,
+// intensidade crescente); UF com menos de 2% do seu eleitorado apurado aparece fraca e sem cor.
+function estados() {
+  const box = document.getElementById("estados");
+  const ufs = dados.estados;
+  box.hidden = !(ufs && ufs.length);
+  if (box.hidden) return;
+  const n = nomes();
+  const t = document.getElementById("tabela-estados");
+  t.replaceChildren();
+  const cab = el("tr");
+  cab.append(el("th", null, "UF"), el("th", null, n.PT.nome), el("th", null, n.PL.nome));
+  const th = el("thead"); th.append(cab); t.append(th);
+  const tb = el("tbody");
+  for (const e of ufs) {
+    const fraca = e.x < 2;
+    const tr = el("tr", fraca ? "uf-fraca" : null);
+    const c0 = el("td", null, e.uf);
+    c0.title = `${fmt(e.x, 1)}% do eleitorado da UF apurado`;
+    tr.append(c0);
+    for (const b of ["PT", "PL"]) {
+      const td = el("td");
+      td.append(el("span", "uf-proj", fmt(e[b])));
+      if (e.pesquisa) {
+        const d = Math.round(10 * (e[b] - e.pesquisa[b])) / 10;
+        td.append(el("span", "uf-dif", ` (${d > 0 ? "+" : d < 0 ? "−" : "±"}${fmt(Math.abs(d))})`));
+        td.title = `projeção ${fmt(e[b])}% · pesquisas ${fmt(e.pesquisa[b])}%`;
+        if (!fraca && d >= 1) {
+          const c = d3.color(cor(b)); c.opacity = 0.12 + 0.33 * Math.min((d - 1) / 4, 1);
+          td.style.background = c.formatRgb();
+        }
+      }
+      tr.append(td);
+    }
     tb.append(tr);
   }
   t.append(tb);

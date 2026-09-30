@@ -12,7 +12,7 @@
 #   site/dados/apuracao.json                  o que a página lê (publicado a cada ciclo)
 args <- commandArgs(TRUE)
 setwd(normalizePath(file.path(dirname(sub("--file=", "", grep("--file=", commandArgs(FALSE), value = TRUE))), "..")))
-source("R/ingestao.R"); source("R/modelo.R"); source("R/pagina.R"); source("R/publicar.R")
+source("R/ingestao.R"); source("R/modelo.R"); source("R/pagina.R"); source("R/publicar.R"); source("R/pesquisas.R")
 publicar_no_ar <- !("sem_publicar" %in% args)     # argumento extra "sem_publicar": só grava o JSON local
 
 p <- carregar_params()
@@ -48,7 +48,8 @@ publicar <- function(fx, ciclo, m, traj) {
   fwrite(lin, file.path(out, "serie.csv"), append = file.exists(file.path(out, "serie.csv")))
   escrever_pagina(serie, eleicao = if (p$ambiente == "simulado") "Simulado TSE 2026 · Presidente" else "Eleições 2026 · Presidente",
                   turno = turno, ambiente = p$ambiente, traj = if (mostrar) traj,
-                  preliminar = if (!mostrar && sum(m$aptos_obs) > 0) setNames(fx$proj, fx$bloco))
+                  preliminar = if (!mostrar && sum(m$aptos_obs) > 0) setNames(fx$proj, fx$bloco),
+                  estados = tryCatch(projetar_uf(m, attr(fx, "est"), centro), error = function(e) NULL), pesq_uf = pesquisas_uf())
   if (publicar_no_ar) publicar_site(esperar = FALSE)            # envia em paralelo; não segura o ciclo
   logmsg(sprintf("apurado %.2f%% | %s", fx$pct_apurado[1], paste(sprintf("%s %.2f%s", fx$bloco, 100 * obs,
     if (mostrar) sprintf(" -> %.2f [%.2f-%.2f]", 100 * fx$proj, 100 * fx$lo, 100 * fx$hi) else ""), collapse = " | ")))

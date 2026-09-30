@@ -20,6 +20,16 @@ ler_pesquisas <- function(arq) {
   d[]
 }
 
+# Pesquisas estaduais (config/pesquisas_uf.csv, mesmo esquema + coluna uf): média simples por UF, em válidos.
+# Lida a cada ciclo da noite; arquivo ausente, vazio ou com erro -> NULL (a tabela da página sai sem a diferença).
+pesquisas_uf <- function(arq = "config/pesquisas_uf.csv") {
+  if (!file.exists(arq) || sum(!grepl("^[[:space:]]*(#|$)", readLines(arq, warn = FALSE))) < 2) return(NULL)   # só cabeçalho
+  tryCatch({
+    d <- ler_pesquisas(arq)
+    d[, .(PT = mean(PT), PL = mean(PL), n = .N), by = .(uf = toupper(trimws(uf)))]
+  }, error = function(e) { message("pesquisas por UF ignoradas: ", conditionMessage(e)); NULL })
+}
+
 prior_de <- function(d, turno = 1, dp_pp = 3) {
   m <- d[, lapply(.SD, mean), .SDcols = c("PT", "PL", "OUTROS")]
   lr <- if (turno == 1) list(PT_OUTROS = log(m$PT / m$OUTROS), PL_OUTROS = log(m$PL / m$OUTROS))

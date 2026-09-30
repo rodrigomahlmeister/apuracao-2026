@@ -176,6 +176,22 @@ projetar <- function(m, est, centro, detalhe = FALSE) {
                                                   PT = val * sPT, PL = val * sPL, OU = val * (1 - sPT - sPL)))
 }
 
+# ---- projeção por UF (tabela "desempenho das pesquisas por estado") ----------------------------------------------
+# Apurado da UF + parte pendente projetada dos seus municípios. Devolve uf, f (fração do eleitorado da UF apurada)
+# e PT, PL, OU em proporção dos válidos projetados. Sem o exterior (ZZ).
+projetar_uf <- function(m, est, centro) {
+  d <- projetar(m, est, centro, detalhe = TRUE)
+  o <- m[, .(apt = sum(aptos), apt_obs = sum(aptos_obs), PT = sum(obs_PT), PL = sum(obs_PL), OU = sum(obs_OU),
+             val = sum(obs_val)), by = uf]
+  if (nrow(d$pend)) {
+    pd <- d$pend[, .(pPT = sum(PT), pPL = sum(PL), pOU = sum(OU), pval = sum(val)), by = uf]
+    o <- merge(o, pd, by = "uf", all.x = TRUE)
+    o[is.na(pval), c("pPT", "pPL", "pOU", "pval") := 0]
+    o[, `:=`(PT = PT + pPT, PL = PL + pPL, OU = OU + pOU, val = val + pval)]
+  }
+  o[uf != "ZZ" & val > 0, .(uf, f = apt_obs / apt, PT = PT / val, PL = PL / val, OU = OU / val)][order(uf)]
+}
+
 # ---- trajetória projetada (o caminho da linha do apurado até 100%) -----------------------------------------------
 # Ritmo de cada UF: fração do eleitorado da UF apurada por minuto nos últimos `janela` minutos.
 # hist: data.table(hora, uf, f) acumulada entre ciclos (f = fração apurada da UF).

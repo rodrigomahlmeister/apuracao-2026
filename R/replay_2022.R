@@ -7,7 +7,7 @@
 #   pausa_s > 0 espera entre instantes (para acompanhar na página); publicar = sim roda R/publicar.R a cada instante.
 args <- commandArgs(TRUE)
 setwd(normalizePath(file.path(dirname(sub("--file=", "", grep("--file=", commandArgs(FALSE), value = TRUE))), "..")))
-source("R/modelo.R"); source("R/pagina.R"); source("R/publicar.R")
+source("R/modelo.R"); source("R/pagina.R"); source("R/publicar.R"); source("R/pesquisas.R")
 tn    <- if (length(args) >= 1) as.integer(args[1]) else 1L
 passo <- if (length(args) >= 2) as.numeric(args[2]) else 5
 pausa <- if (length(args) >= 3) as.numeric(args[3]) else 0
@@ -21,6 +21,7 @@ logmsg <- function(...) message(format(Sys.time(), "%H:%M:%S"), " ", ...)
 base <- carregar_base(tn, secoes = "replay2022_secao", municipios = "replay2022_municipios")
 bl <- read_yaml("config/blocos.yaml")$eleicoes[["2022"]]
 prior <- prior_swing(base, arq = sprintf("config/prior_2022_%dt.yaml", tn))
+arq_pesq_uf <- sprintf("config/pesquisas_uf_2022_%dt.csv", tn)
 
 s <- rd("secoes_2022.parquet")[turno == tn, .(uf, mun, zona, secao, aptos, comparecimento, dt_recebido)]
 s[, sid := .I]
@@ -59,7 +60,8 @@ for (T in as.list(instantes)) {
   na_se <- function(x) if (mostrar) x else rep(NA_real_, length(x))
   serie <- rbind(serie, fx[, .(hora = T, bloco, apurado = obs, proj = na_se(proj), lo = na_se(lo), hi = na_se(hi),
                                p_2turno = na_se(p_2turno), pestn = pct_apurado)])
-  escrever_pagina(serie, "Presidente 2022 (replay)", tn, "replay", traj = traj, preliminar = if (!mostrar) setNames(fx$proj, fx$bloco))
+  escrever_pagina(serie, "Presidente 2022 (replay)", tn, "replay", traj = traj, preliminar = if (!mostrar) setNames(fx$proj, fx$bloco),
+                 estados = projetar_uf(m, attr(fx, "est"), centro), pesq_uf = pesquisas_uf(arq_pesq_uf))
   if (pub) publicar_site(esperar = FALSE)
   logmsg(sprintf("%s %5.1f%% | PT %.2f PL %.2f%s | %.0f s", format(T, "%H:%M", tz = tz), fx$pct_apurado[1], 100 * obs[1], 100 * obs[2],
                  if (mostrar) sprintf(" -> %.2f / %.2f", 100 * fx$proj[1], 100 * fx$proj[2]) else "", as.numeric(difftime(Sys.time(), t0, units = "secs"))))

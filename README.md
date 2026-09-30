@@ -22,7 +22,7 @@ Saídas: `saida/atual/` (`projecao.json`, `serie.json`, `grafico.png`) e o hist�
 | `http.R` | requisições em paralelo com limite de taxa, ETag e pausa total em caso de bloqueio |
 | `modelo.R` | o método de projeção |
 | `grafico.R` | gráfico da apuração |
-| `pesquisas.R` | (opcional) gera `config/prior.yaml` a partir de `config/pesquisas.csv` |
+| `pesquisas.R` | (opcional) gera `config/prior.yaml` a partir de `config/pesquisas.csv`; lê `config/pesquisas_uf.csv` (pesquisas estaduais, relido a cada ciclo) |
 
 ## Método
 Base = resultado de 2022 levado aos locais de votação de 2026 (pareamento de locais). O arquivo de seções do
