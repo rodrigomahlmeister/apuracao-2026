@@ -54,7 +54,7 @@ function cabecalho(ult, comProj) {
   const st = document.getElementById("status");
   st.replaceChildren();
   st.append(el("strong", null, `${fmt(ult.x, 2)}%`), " do eleitorado apurado · atualizado às ", el("strong", null, ult.t));
-  if (!comProj) st.append(el("span", "selo", "projeção a partir de 2% apurado"));
+  if (!comProj) st.append(el("span", "selo", "projeção imprecisa até 2% apurado"));
   else if (ult.x < 5) st.append(el("span", "selo", "projeção preliminar"));
   const p2 = document.getElementById("p2t");
   p2.replaceChildren();
@@ -82,6 +82,10 @@ function cartoes(ult, comProj) {
       c.append(v, el("div", "cartao-rotulo", "projeção do resultado final"));
       const f = comProj.faixa[b];
       c.append(el("div", "cartao-faixa", `faixa de 90%: ${fmt(f[0])} – ${fmt(f[1])}`));
+    } else if (dados.projecao_preliminar) {
+      const v = el("div", "cartao-valor preliminar");
+      v.append(el("span", "num", fmt(dados.projecao_preliminar[b])), el("span", "pct", "%"));
+      c.append(v, el("div", "cartao-rotulo", "projeção imprecisa: espere ao menos 2% da apuração"));
     } else {
       const v = el("div", "cartao-valor", fmt(ult.apurado[b]));
       v.append(el("span", "pct", "%"));

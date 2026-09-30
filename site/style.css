@@ -62,6 +62,9 @@ body {
 .cartao-partido { color: var(--texto-3); font-weight: 500; }
 .cartao-valor { font-size: clamp(34px, 5vw, 48px); font-weight: 650; line-height: 1.05; margin: 10px 0 2px; letter-spacing: -0.02em; }
 .cartao-valor .pct { font-size: .5em; font-weight: 600; margin-left: 2px; color: var(--texto-2); }
+.cartao-valor.preliminar { color: var(--texto-3); font-weight: 500; margin-bottom: 10px; }
+.cartao-valor.preliminar .num { border-bottom: 2px dotted currentColor; }
+.cartao-valor.preliminar .pct { color: var(--texto-3); }
 .cartao-rotulo { font-size: 13px; color: var(--texto-3); }
 .cartao-faixa { font-size: 14px; color: var(--texto-2); margin-top: 8px; font-variant-numeric: tabular-nums; }
 .cartao-apurado { font-size: 14px; color: var(--texto-2); font-variant-numeric: tabular-nums; }

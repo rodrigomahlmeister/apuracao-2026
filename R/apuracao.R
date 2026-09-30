@@ -47,7 +47,8 @@ publicar <- function(fx, ciclo, m, traj) {
   serie <<- rbind(if (nrow(serie)) serie[rodada == ciclo$rodada], lin)    # reinício do simulado: série nova
   fwrite(lin, file.path(out, "serie.csv"), append = file.exists(file.path(out, "serie.csv")))
   escrever_pagina(serie, eleicao = if (p$ambiente == "simulado") "Simulado TSE 2026 · Presidente" else "Eleições 2026 · Presidente",
-                  turno = turno, ambiente = p$ambiente, traj = if (mostrar) traj)
+                  turno = turno, ambiente = p$ambiente, traj = if (mostrar) traj,
+                  preliminar = if (!mostrar && sum(m$aptos_obs) > 0) setNames(fx$proj, fx$bloco))
   if (publicar_no_ar) publicar_site(esperar = FALSE)            # envia em paralelo; não segura o ciclo
   logmsg(sprintf("apurado %.2f%% | %s", fx$pct_apurado[1], paste(sprintf("%s %.2f%s", fx$bloco, 100 * obs,
     if (mostrar) sprintf(" -> %.2f [%.2f-%.2f]", 100 * fx$proj, 100 * fx$lo, 100 * fx$hi) else ""), collapse = " | ")))

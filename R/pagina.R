@@ -4,7 +4,8 @@ suppressPackageStartupMessages({ library(data.table); library(jsonlite); library
 
 # serie: data.table longa com hora (POSIXct), pestn (0-100), bloco, apurado, proj, lo, hi, p_2turno (proporções)
 # traj: trajetória projetada do ciclo atual (x, PT, PL, OU em proporção), ou NULL
-escrever_pagina <- function(serie, eleicao, turno, ambiente, traj = NULL, arq = "site/dados/apuracao.json",
+# preliminar: projeção pontual abaixo de 2% apurado (vetor nomeado PT, PL, OUTROS, proporções), exibida só como número fraco
+escrever_pagina <- function(serie, eleicao, turno, ambiente, traj = NULL, preliminar = NULL, arq = "site/dados/apuracao.json",
                             candidatos = read_yaml("config/blocos.yaml")$candidatos, tz = "America/Sao_Paulo") {
   w <- dcast(serie, hora + pestn ~ bloco, value.var = c("apurado", "proj", "lo", "hi", "p_2turno"))[order(hora)]
   r <- function(v) round(100 * v, 2)
@@ -18,6 +19,7 @@ escrever_pagina <- function(serie, eleicao, turno, ambiente, traj = NULL, arq = 
   out <- list(eleicao = eleicao, turno = turno, ambiente = ambiente,
               atualizado = format(u$hora, "%d/%m/%Y %H:%M", tz = tz), pct_eleitorado_apurado = round(u$pestn, 2),
               candidatos = candidatos, pontos = pontos,
+              projecao_preliminar = if (!is.null(preliminar)) as.list(r(preliminar[c("PT", "PL", "OUTROS")])),
               trajetoria = if (!is.null(traj) && nrow(traj)) lapply(seq_len(nrow(traj)), \(i) with(traj[i],
                 list(x = round(x, 2), PT = r(PT), PL = r(PL), OUTROS = r(OU)))))
   dir.create(dirname(arq), recursive = TRUE, showWarnings = FALSE)
