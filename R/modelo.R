@@ -72,20 +72,37 @@ estado <- function(ciclo, base, blocos) {
   if (!is.null(cs) && nrow(cs)) {
     csp <- unique(cs[is.na(nsp), .(uf = toupper(uf), mun = as.integer(mun), zona = as.integer(zona),
                                   secao_cs = as.integer(secao), tem = !is.na(ha))])
-    x <- merge(csp, bsec, by = c("uf", "mun", "zona", "secao_cs"), all.x = TRUE)
-    bc <- c("b_comp", "b_val", "b_PT", "b_PL", "b_OU")
-    x[, (bc) := lapply(.SD, as.numeric), .SDcols = bc]
-    x[, (bc) := lapply(.SD, \(v) fcoalesce(v, mean(v, na.rm = TRUE))), by = mun, .SDcols = bc]
+    # base por seção do cs: a seção agregada que o cs lista como própria usa a própria base; as demais somam na principal
+    bc <- c("eleitores", "b_comp", "b_val", "b_PT", "b_PL", "b_OU")
+    bs <- bsec[, c("uf", "mun", "zona", "secao_cs", if ("secao" %in% names(bsec)) "secao", bc), with = FALSE]
+    if (!"secao" %in% names(bs)) bs[, secao := secao_cs]
+    bs[, (bc) := lapply(.SD, as.numeric), .SDcols = bc]
+    bs[csp, on = .(uf, mun, zona, secao = secao_cs), secao_cs := secao]
+    if (anyDuplicated(bs, by = c("uf", "mun", "zona", "secao_cs"))) bs <- bs[, lapply(.SD, sum), by = .(uf, mun, zona, secao_cs), .SDcols = bc]
+    x <- merge(csp, bs[, c("uf", "mun", "zona", "secao_cs", bc), with = FALSE], by = c("uf", "mun", "zona", "secao_cs"), all.x = TRUE)
+    # seção do cs sem base (criada depois do cadastro de eleitorado): média por seção da zona; sem zona, do município
+    for (g in list(c("mun", "zona"), "mun")) {
+      if (!anyNA(x$b_comp)) break
+      med <- x[!is.na(b_comp), lapply(.SD, mean), by = g, .SDcols = bc]
+      x[is.na(b_comp), (bc) := med[.SD, on = g, mget(paste0("x.", bc))]]
+    }
     x <- merge(x[!is.na(b_comp)], m[, .(mun, n_u = st)], by = "mun")
     x[, `:=`(n_c = sum(tem), n = .N), by = mun]
     x[, w := fcase(n_c == n_u, as.numeric(tem), n_c < n_u, fifelse(tem, 1, (n_u - n_c) / pmax(n - n_c, 1)),
                    default = fifelse(tem, n_u / n_c, 0))]
-    pb <- x[, .(bp_comp = sum(b_comp * (1 - w)), bp_val = sum(b_val * (1 - w)), bp_PT = sum(b_PT * (1 - w)),
+    # total e pendente com as seções que o cs lista, na escala do eleitorado da divulgação (total e pendente na
+    # mesma escala: a base da parte apurada é a diferença entre os dois)
+    pb <- x[, .(xe = sum(eleitores), xt_comp = sum(b_comp), xt_val = sum(b_val), xt_PT = sum(b_PT), xt_PL = sum(b_PL), xt_OU = sum(b_OU),
+                bp_comp = sum(b_comp * (1 - w)), bp_val = sum(b_val * (1 - w)), bp_PT = sum(b_PT * (1 - w)),
                 bp_PL = sum(b_PL * (1 - w)), bp_OU = sum(b_OU * (1 - w)), dessinc = n_c[1] != n_u[1]), by = mun]
     m <- merge(m, pb, by = "mun", all.x = TRUE)
+    tem_x <- !is.na(m$xe) & m$xe > 0
+    fx <- fifelse(tem_x, m$aptos / m$xe, 0)
     for (k in c("comp", "val", "PT", "PL", "OU")) {
-      col <- paste0("bp_", k); set(m, j = col, value = fcoalesce(m[[col]], 0) * m$aptos / m$aptos_base * fifelse(m$completo, 0, 1))
+      bt <- paste0("bt_", k); set(m, j = bt, value = fifelse(tem_x, m[[paste0("xt_", k)]] * fx, m[[bt]]))
+      col <- paste0("bp_", k); set(m, j = col, value = fcoalesce(m[[col]] * fx, 0) * fifelse(m$completo, 0, 1))
     }
+    m[, c("xe", paste0("xt_", c("comp", "val", "PT", "PL", "OU"))) := NULL]
   } else {                                                       # sem arquivo de seções: pendente proporcional
     g <- pmax(m$aptos - m$aptos_obs, 0) / m$aptos
     for (k in c("comp", "val", "PT", "PL", "OU")) set(m, j = paste0("bp_", k), value = m[[paste0("bt_", k)]] * g)

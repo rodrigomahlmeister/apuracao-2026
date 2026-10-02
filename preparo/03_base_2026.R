@@ -11,7 +11,8 @@ chk <- merge(par$alvo[, .(t_id, uf, mun, zona, local)], par$nivel[, .(t_id, u2 =
 stopifnot(nrow(chk) == nrow(par$nivel), chk[uf != u2 | mun != m2 | zona != z2 | local != l2, .N] == 0)
 
 sec <- rd("eleitorado_secao_2026.parquet")[, .(uf, mun, zona, secao, local, eleitores, secao_principal, tipo_agregada)]
-# seção que aparece no arquivo de seções do TSE = principal (as agregadas somam na principal)
+# seção principal de cada seção agregada (tipo 2). A base sai seção a seção, com as duas chaves: se o cs da noite
+# listar a agregada como seção própria, ela usa a própria base; se não, soma na principal (R/modelo.R, estado()).
 sec[, secao_cs := fifelse(!is.na(secao_principal) & secao_principal > 0 & tipo_agregada != 1, secao_principal, secao)]
 
 for (tn in 1:2) {
@@ -26,9 +27,9 @@ for (tn in 1:2) {
   }
   out <- x[, .(eleitores = sum(eleitores), b_comp = sum(eleitores * comparecimento), b_val = sum(eleitores * validos),
                b_PT = sum(eleitores * PT), b_PL = sum(eleitores * PL), b_OU = sum(eleitores * OUTROS)),
-           by = .(uf, mun, zona, secao_cs)]
+           by = .(uf, mun, zona, secao, secao_cs)]
   write_parquet(out, sprintf("dados/base/base_2026_secao_t%d.parquet", tn), compression = "zstd")
-  message(sprintf("turno %d: %d seções principais, %d eleitores, base PT %.1f%% / PL %.1f%% dos válidos", tn, nrow(out),
+  message(sprintf("turno %d: %d seções, %d eleitores, base PT %.1f%% / PL %.1f%% dos válidos", tn, nrow(out),
                   sum(out$eleitores), 100 * sum(out$b_PT) / sum(out$b_val), 100 * sum(out$b_PL) / sum(out$b_val)))
 }
 

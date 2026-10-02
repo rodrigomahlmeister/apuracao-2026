@@ -57,3 +57,21 @@ test_that("estimação pela parte apurada usa a base da parte apurada (bt - bp)"
   expect_equal(unname(pj[c("PT", "PL")]), real, tolerance = 1e-3)
   expect_equal(est$n_unidades, nrow(m))
 })
+
+test_that("estado: agregada listada no cs usa a própria base; seção nova recebe a média da zona; escala consistente", {
+  bl <- list(PT = 13, PL = 22)
+  # município 1, zona 1: seções 1 e 2 (2 é agregada à 1) e 3; o cs lista 1, 2, 3 e a seção nova 4
+  bsec <- data.table(uf = "AA", mun = 1L, zona = 1L, secao = c(1L, 2L, 3L), secao_cs = c(1L, 1L, 3L), eleitores = 100,
+                     b_comp = 80, b_val = 70, b_PT = c(40, 10, 30), b_PL = c(20, 50, 30), b_OU = c(10, 10, 10))
+  base <- list(sec = bsec, mun = data.table(uf = "AA", mun = 1L, regiao = "R1", elegivel = TRUE), turno = 1)
+  cs <- data.table(uf = "aa", mun = "00001", zona = "0001", secao = sprintf("%04d", 1:4), nsp = NA_character_,
+                   ha = c("x", "x", NA, NA))
+  ut <- data.table(tpabr = "mu", cdabr = "00001", ts = 4L, st = 2L, te = 400, est = 200, c = 160)
+  uc <- data.table(tpabr = "mu", cdabr = "00001", n = c("13", "22", "99"), vap = c(50, 70, 20), dvt = "Válido")
+  m <- estado(list(u_tot = ut, u_cand = uc, cs = cs, rodada = 1L), base, bl)
+  # pendentes: seção 3 (base própria) + seção 4 (média da zona = média das seções 1, 2, 3); escala te / soma do cs = 400 / 400
+  expect_equal(m$bp_PT, 30 + (40 + 10 + 30) / 3)
+  expect_equal(m$bt_PT, 40 + 10 + 30 + 80 / 3)
+  expect_equal(m$bt_PT - m$bp_PT, 50)                 # base da parte apurada = seções 1 e 2, cada uma com a própria base
+  expect_false(m$dessinc)
+})

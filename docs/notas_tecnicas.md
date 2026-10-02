@@ -319,3 +319,16 @@ Replay 2022 com código de produção, passo de 5 min, a partir de 2% apurado (`
 
 - Resíduo próprio: piora nos dois turnos. O swing observado na parte apurada de um município carrega composição interna (quais bairros chegaram primeiro) que não vale para a parte pendente.
 - Seção a seção: ganho pequeno no 2T (−0,01 a −0,015 p.p., um único replay), perda grande no 1T entre 5% e 50% apurado. Com três blocos, a razão log por seção (contagens pequenas, Outros disperso em 2018) é ruidosa e o softmax por seção introduz viés. Mantido o município como unidade nos dois turnos.
+
+## Seções do cs sem base (01/10)
+No cs do simulado (rodada 3), 7,1% das 528.951 seções não tinham par na base de 2026:
+- 15.609 eram **seções agregadas** (tipo 2 no cadastro) que o cs lista como seções próprias, com horário próprio. A base as somava na principal.
+- 22.121 **não existem no cadastro de eleitorado de 2026** baixado em 27/09: números logo acima do último da zona (88%), em 973 municípios, ~220 eleitores cada (o `-u` do simulado tem 163,1 mi de eleitores, a base 158,7 mi). Seções criadas depois do cadastro.
+- Efeito no código anterior: seção sem base recebia a média por seção do município e, além disso, o município era reescalado pelo eleitorado da divulgação, o que contava em dobro a parte pendente (base apurada = total − pendente ficava errada). Replay 2022 removendo da base as seções de número mais alto de cada zona até 7%: erro médio 1T 0,04 → 0,20 p.p. (máx. 1,32); 2T 0,04 → 0,24 (máx. 1,97).
+
+Correção em `estado()` (e `preparo/03_base_2026.R`, que agora grava a base seção a seção com `secao` e `secao_cs`):
+1. agregada que o cs lista como própria usa a própria base; as não listadas somam na principal;
+2. seção do cs sem base recebe a média por seção da zona (sem zona, do município);
+3. total e pendente do município calculados sobre as seções que o cs lista e escalados juntos por eleitorado da divulgação / soma da base dessas seções.
+
+Resultado: 95,8% das seções do cs com base própria (4,2% preenchidas pela zona). Replay 2022 com 7% removidas: 1T 0,040 (base completa 0,041), 2T 0,043 (0,036). Checagem de produção no simulado: 37 ciclos OK, nenhuma base apurada negativa. Tempo por ciclo: estado 1,8 s, projeção com faixa 4,6 s. Teste: `estudos/teste_cs_sem_par.R`; teste unitário em `tests/testthat/test_modelo.R`.
