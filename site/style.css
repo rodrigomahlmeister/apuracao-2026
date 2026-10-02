@@ -140,22 +140,27 @@ body {
 .leg-estados .amostra { display: inline-block; min-width: 26px; padding: 1px 4px; border-radius: 4px; text-align: center;
   color: var(--texto); font-variant-numeric: tabular-nums; }
 .leg-estados .amostra:first-of-type { margin-left: 4px; }
-#tabela-estados { width: auto; max-width: 100%; }
+#tabela-estados { width: 100%; }
 #tabela-estados td, #tabela-estados th { padding: 4px 8px; }
-#tabela-estados .uf-sigla { font-weight: 600; color: var(--texto); }
+#tabela-estados .uf-sigla { width: 1%; font-weight: 600; color: var(--texto); text-align: left; padding-left: 12px; }
+#tabela-estados .col-cand { width: 1%; min-width: 128px; padding: 4px 14px; }
 #tabela-estados tr.inicio-regiao td { border-top: 1px solid var(--texto-3); }
-#tabela-estados .col-barra { text-align: left; padding-left: 16px; }
-.barra { display: inline-block; width: 120px; height: 8px; border-radius: 4px; background: var(--grade); vertical-align: middle; overflow: hidden; }
+#tabela-estados .col-barra { text-align: left; padding-left: 20px; width: auto; }
+.barra-linha { display: flex; align-items: center; gap: 10px; }
+.barra { flex: 1; height: 8px; border-radius: 4px; background: var(--grade); overflow: hidden; }
 .barra-cheia { display: block; height: 100%; border-radius: 4px; background: var(--texto-3); }
-.barra-rot { display: inline-block; min-width: 34px; margin-left: 8px; text-align: right; color: var(--texto-2); }
-#tabela-estados td.regiao { border-bottom: none; border-left: 2px solid var(--texto-3); padding: 0 0 0 10px; text-align: left;
-  vertical-align: middle; color: var(--texto-2); font-size: 12px; }
+.barra-rot { flex: none; min-width: 36px; text-align: right; color: var(--texto-2); font-variant-numeric: tabular-nums; }
+#tabela-estados td.regiao { width: 1%; border-bottom: none; border-right: 2px solid var(--texto-3); padding: 0 10px 0 0;
+  text-align: right; vertical-align: middle; color: var(--texto-2); font-size: 12px; }
 #tabela-estados tr.inicio-regiao td.regiao { border-top: 1px solid var(--texto-3); }
 .regiao-sigla { display: none; }
 @media (max-width: 560px) {
-  .barra { width: 56px; }
   .regiao-nome { display: none; }
   .regiao-sigla { display: inline; }
   #tabela-estados td, #tabela-estados th { padding: 4px 5px; }
+  #tabela-estados .col-cand { min-width: 0; padding: 4px 6px; }
+  #tabela-estados .uf-sigla { padding-left: 6px; }
   #tabela-estados .col-barra { padding-left: 8px; }
+  .barra { min-width: 36px; }
+  .barra-linha { gap: 6px; }
 }

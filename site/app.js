@@ -306,7 +306,7 @@ function estados() {
   const t = document.getElementById("tabela-estados");
   t.replaceChildren();
   const cab = el("tr");
-  cab.append(el("th", null, "UF"), el("th", null, n.PT.nome), el("th", null, n.PL.nome), el("th", "col-barra", "apurado no estado"), el("th"));
+  cab.append(el("th"), el("th", "uf-sigla", "UF"), el("th", "col-cand", n.PT.nome), el("th", "col-cand", n.PL.nome), el("th", "col-barra", "apurado no estado"));
   const th = el("thead"); th.append(cab); t.append(th);
   const tb = el("tbody");
   ORDEM_UF.filter(([uf]) => porUf[uf]).forEach(([uf, rg], i, arr) => {
@@ -314,9 +314,15 @@ function estados() {
     const fraca = e.x < 2;
     const novaReg = i === 0 || arr[i - 1][1] !== rg;
     const tr = el("tr", [fraca ? "uf-fraca" : "", novaReg && i > 0 ? "inicio-regiao" : ""].join(" ").trim() || null);
+    if (novaReg) {
+      const tdr = el("td", "regiao");
+      tdr.rowSpan = arr.filter((q) => q[1] === rg).length;
+      tdr.append(el("span", "regiao-nome", REGIOES[rg]), el("span", "regiao-sigla", rg));
+      tr.append(tdr);
+    }
     tr.append(el("td", "uf-sigla", uf));
     for (const b of ["PT", "PL"]) {
-      const td = el("td");
+      const td = el("td", "col-cand");
       td.append(el("span", "uf-proj", fmt(e[b])));
       if (e.pesquisa) {
         const d = Math.round(10 * (e[b] - e.pesquisa[b])) / 10;
@@ -331,14 +337,10 @@ function estados() {
     const barra = el("span", "barra"), cheia = el("span", "barra-cheia");
     cheia.style.width = `${Math.max(0, Math.min(100, e.x))}%`;
     barra.append(cheia);
-    tdb.append(barra, el("span", "barra-rot", `${fmt(e.x, 0)}%`));
+    const cx = el("span", "barra-linha");
+    cx.append(barra, el("span", "barra-rot", `${fmt(e.x, 0)}%`));
+    tdb.append(cx);
     tr.append(tdb);
-    if (novaReg) {
-      const tdr = el("td", "regiao");
-      tdr.rowSpan = arr.filter((q) => q[1] === rg).length;
-      tdr.append(el("span", "regiao-nome", REGIOES[rg]), el("span", "regiao-sigla", rg));
-      tr.append(tdr);
-    }
     tb.append(tr);
   });
   t.append(tb);
