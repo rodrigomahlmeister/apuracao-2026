@@ -32,7 +32,9 @@ function nomes() {
 
 // ---------------------------------------------------------------------------------------------------------
 function desenhar(pontos) {
-  if (!pontos || !pontos.length) return;
+  const espera = !pontos || !pontos.length;
+  for (const id of ["cartoes", "painel", "dados-tabela", "estados"]) { const e = document.getElementById(id); if (e) e.hidden = espera; }
+  if (espera) { aguardando(); return; }
   const ult = pontos[pontos.length - 1];
   const comProj = [...pontos].reverse().find((p) => p.projecao);
   cabecalho(ult, comProj);
@@ -41,6 +43,17 @@ function desenhar(pontos) {
   grafico(pontos);
   tabela(pontos);
   estados();
+}
+
+// Antes da primeira seção apurada: título da eleição e a hora da última verificação no TSE.
+function aguardando() {
+  document.getElementById("eleicao").textContent = `${dados.eleicao} · ${dados.turno}º turno`;
+  document.getElementById("aviso").hidden = true;
+  const st = document.getElementById("status");
+  st.replaceChildren();
+  const hora = (dados.atualizado || "").split(" ")[1];
+  st.append(el("strong", null, "Aguardando o início da apuração."), " As urnas fecham às 17h (Brasília); os primeiros resultados",
+    " saem logo depois e esta página se atualiza sozinha.", hora ? ` Última verificação no TSE: ${hora}.` : "");
 }
 
 function cabecalho(ult, comProj) {

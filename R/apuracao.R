@@ -37,6 +37,16 @@ logmsg(sprintf("ambiente %s | %dº turno | eleição %s, pleito %s | %d municíp
 
 serie <- data.table()
 hist_uf <- data.table()          # fração apurada de cada UF por ciclo, para medir o ritmo (trajetória)
+# reinício no meio da noite: retoma a série da última execução do mesmo ambiente, turno e dia
+ant <- setdiff(Sys.glob(file.path("saida", sprintf("%s_t%d_%s_*", p$ambiente, turno, format(Sys.time(), "%Y-%m-%d", tz = tz)))), out)
+ant <- ant[file.exists(file.path(ant, "serie.csv"))]
+if (length(ant)) {
+  arq_ant <- file.path(sort(ant, decreasing = TRUE)[1], "serie.csv")
+  serie <- fread(arq_ant)[, hora := as.POSIXct(hora, tz = "UTC")]
+  fwrite(serie, file.path(out, "serie.csv"))
+  logmsg(sprintf("série retomada de %s: %d ciclos, até %.2f%% apurado", arq_ant, uniqueN(serie$hora), max(serie$pestn)))
+}
+eleicao_nome <- if (p$ambiente == "simulado") "Simulado TSE 2026 · Presidente" else "Eleições 2026 · Presidente"
 publicar <- function(fx, ciclo, m, traj) {
   obs <- m[, c(sum(obs_PT), sum(obs_PL), sum(obs_OU)) / max(sum(obs_val), 1)]
   pstn <- 100 * sum(m$st) / sum(m$ts)
@@ -46,7 +56,7 @@ publicar <- function(fx, ciclo, m, traj) {
                 hi = na_se(hi), p_2turno = na_se(p_2turno), pestn = pct_apurado, pstn = pstn)]
   serie <<- rbind(if (nrow(serie)) serie[rodada == ciclo$rodada], lin)    # reinício do simulado: série nova
   fwrite(lin, file.path(out, "serie.csv"), append = file.exists(file.path(out, "serie.csv")))
-  escrever_pagina(serie, eleicao = if (p$ambiente == "simulado") "Simulado TSE 2026 · Presidente" else "Eleições 2026 · Presidente",
+  escrever_pagina(serie, eleicao = eleicao_nome,
                   turno = turno, ambiente = p$ambiente, traj = if (mostrar) traj,
                   preliminar = if (!mostrar && sum(m$aptos_obs) > 0) setNames(fx$proj, fx$bloco),
                   estados = tryCatch(projetar_uf(m, attr(fx, "est"), centro), error = function(e) NULL), pesq_uf = pesquisas_uf())
@@ -71,7 +81,13 @@ repeat {
       fx <- projetar_faixa(m, turno, prior, centro)
       traj <- trajetoria(m, attr(fx, "est"), centro, ritmo_uf(hist_uf, agora))
       publicar(fx, ciclo, m, traj)
-    } else logmsg("nenhuma seção apurada ainda")
+    } else {
+      logmsg("nenhuma seção apurada ainda")
+      if (!nrow(serie)) {                                       # página "aguardando", com a hora da verificação
+        escrever_espera(eleicao_nome, turno, p$ambiente)
+        if (publicar_no_ar) publicar_site(esperar = FALSE)
+      }
+    }
     ciclo$n_req
   }, error = \(e) { logmsg("ERRO no ciclo: ", conditionMessage(e)); NA })
   dur <- as.numeric(difftime(Sys.time(), t0, units = "secs"))

@@ -35,3 +35,16 @@ escrever_pagina <- function(serie, eleicao, turno, ambiente, traj = NULL, prelim
   file.rename(tmp, arq)
   invisible(arq)
 }
+
+# Antes da primeira seção apurada: só metadados e a hora da última verificação no TSE (a página mostra "aguardando").
+escrever_espera <- function(eleicao, turno, ambiente, arq = "site/dados/apuracao.json",
+                            candidatos = read_yaml("config/blocos.yaml")$candidatos, tz = "America/Sao_Paulo") {
+  out <- list(eleicao = eleicao, turno = turno, ambiente = ambiente, aguardando = TRUE,
+              atualizado = format(Sys.time(), "%d/%m/%Y %H:%M", tz = tz), pct_eleitorado_apurado = 0,
+              candidatos = candidatos, pontos = list())
+  dir.create(dirname(arq), recursive = TRUE, showWarnings = FALSE)
+  tmp <- paste0(arq, ".tmp")
+  write_json(out, tmp, auto_unbox = TRUE, null = "null", digits = NA)
+  file.rename(tmp, arq)
+  invisible(arq)
+}
