@@ -272,43 +272,75 @@ function tabela(pontos) {
   t.append(tb);
 }
 
-// Desempenho das pesquisas por estado: projeção de cada candidato na UF e, entre parênteses, a diferença para a
-// média das pesquisas no estado. Célula tingida na cor do candidato quando ele supera a pesquisa (de 1 a 5 p.p.,
-// intensidade crescente); UF com menos de 2% do seu eleitorado apurado aparece fraca e sem cor.
+// Diferença entre a urna e a pesquisa em cada estado: projeção de cada candidato na UF e, entre parênteses, a
+// diferença para a média das pesquisas no estado. A célula ganha a cor do candidato quando ele supera a pesquisa;
+// a intensidade cresce de 0,5 a 4 p.p. (4 p.p. ou mais = cor máxima). UF com menos de 2% do seu eleitorado apurado
+// aparece fraca e sem cor. Ordem: regiões e, dentro delas, UFs pelo voto no PT no 1º turno de 2022.
+const ORDEM_UF = [["PI","NE"],["BA","NE"],["MA","NE"],["CE","NE"],["PE","NE"],["PB","NE"],["SE","NE"],["RN","NE"],["AL","NE"],
+  ["PA","N"],["TO","N"],["AM","N"],["AP","N"],["AC","N"],["RO","N"],["RR","N"],["MG","SE"],["SP","SE"],["RJ","SE"],["ES","SE"],
+  ["GO","CO"],["MS","CO"],["DF","CO"],["MT","CO"],["RS","S"],["PR","S"],["SC","S"]];
+const REGIOES = { NE: "Nordeste", N: "Norte", SE: "Sudeste", CO: "Centro-Oeste", S: "Sul" };
+const DIF_MAX = 4;
+const tom = (b, d) => {                                   // cor de fundo para quem superou a pesquisa em d p.p.
+  if (d < 0.5) return null;
+  const c = d3.color(cor(b)); c.opacity = 0.12 + 0.58 * Math.min((d - 0.5) / (DIF_MAX - 0.5), 1);
+  return c.formatRgb();
+};
+
 function estados() {
   const box = document.getElementById("estados");
-  const ufs = dados.estados;
-  box.hidden = !(ufs && ufs.length);
+  const lista = dados.estados;
+  box.hidden = !(lista && lista.length);
   if (box.hidden) return;
   const n = nomes();
+  document.getElementById("nota-estados-demo").hidden = dados.ambiente !== "replay";
+  const leg = document.getElementById("legenda-estados");
+  leg.replaceChildren();
+  for (const b of ["PT", "PL"]) {
+    const g = el("span", "leg-estados");
+    g.append(`${n[b].nome} acima da pesquisa:`);
+    for (const d of [1, 2, 3, 4]) { const s = el("span", "amostra", `+${d}`); s.style.background = tom(b, d); g.append(s); }
+    leg.append(g);
+  }
+  const porUf = Object.fromEntries(lista.map((e) => [e.uf, e]));
   const t = document.getElementById("tabela-estados");
   t.replaceChildren();
   const cab = el("tr");
-  cab.append(el("th", null, "UF"), el("th", null, n.PT.nome), el("th", null, n.PL.nome));
+  cab.append(el("th", null, "UF"), el("th", null, n.PT.nome), el("th", null, n.PL.nome), el("th", "col-barra", "apurado no estado"), el("th"));
   const th = el("thead"); th.append(cab); t.append(th);
   const tb = el("tbody");
-  for (const e of ufs) {
+  ORDEM_UF.filter(([uf]) => porUf[uf]).forEach(([uf, rg], i, arr) => {
+    const e = porUf[uf];
     const fraca = e.x < 2;
-    const tr = el("tr", fraca ? "uf-fraca" : null);
-    const c0 = el("td", null, e.uf);
-    c0.title = `${fmt(e.x, 1)}% do eleitorado da UF apurado`;
-    tr.append(c0);
+    const novaReg = i === 0 || arr[i - 1][1] !== rg;
+    const tr = el("tr", [fraca ? "uf-fraca" : "", novaReg && i > 0 ? "inicio-regiao" : ""].join(" ").trim() || null);
+    tr.append(el("td", "uf-sigla", uf));
     for (const b of ["PT", "PL"]) {
       const td = el("td");
       td.append(el("span", "uf-proj", fmt(e[b])));
       if (e.pesquisa) {
         const d = Math.round(10 * (e[b] - e.pesquisa[b])) / 10;
         td.append(el("span", "uf-dif", ` (${d > 0 ? "+" : d < 0 ? "−" : "±"}${fmt(Math.abs(d))})`));
-        td.title = `projeção ${fmt(e[b])}% · pesquisas ${fmt(e.pesquisa[b])}%`;
-        if (!fraca && d >= 1) {
-          const c = d3.color(cor(b)); c.opacity = 0.12 + 0.33 * Math.min((d - 1) / 4, 1);
-          td.style.background = c.formatRgb();
-        }
+        td.title = `projeção ${fmt(e[b])}% · pesquisa ${fmt(e.pesquisa[b])}%`;
+        const bg = fraca ? null : tom(b, d);
+        if (bg) td.style.background = bg;
       }
       tr.append(td);
     }
+    const tdb = el("td", "col-barra");
+    const barra = el("span", "barra"), cheia = el("span", "barra-cheia");
+    cheia.style.width = `${Math.max(0, Math.min(100, e.x))}%`;
+    barra.append(cheia);
+    tdb.append(barra, el("span", "barra-rot", `${fmt(e.x, 0)}%`));
+    tr.append(tdb);
+    if (novaReg) {
+      const tdr = el("td", "regiao");
+      tdr.rowSpan = arr.filter((q) => q[1] === rg).length;
+      tdr.append(el("span", "regiao-nome", REGIOES[rg]), el("span", "regiao-sigla", rg));
+      tr.append(tdr);
+    }
     tb.append(tr);
-  }
+  });
   t.append(tb);
 }
 

@@ -79,12 +79,15 @@ A linha pontilhada mostra o caminho esperado do % apurado até 100%: a parte pen
 apuração observado nela nos últimos 15 minutos (UF atrasada termina depois), e os municípios pendentes da UF avançam
 juntos. O ponto final coincide com a projeção; o formato do caminho depende da ordem suposta e é menos certo que ele.
 
-## 7. Projeção por estado e pesquisas estaduais
+## 7. Projeção por estado: diferença entre a urna e a pesquisa
 
 A projeção de cada UF é o apurado da UF mais a parte pendente projetada dos seus municípios (mesmo modelo da seção 4,
 sem estimação adicional). A página compara essa projeção com a média simples das últimas pesquisas estaduais
 (`config/pesquisas_uf.csv`, convertidas para votos válidos). A célula recebe a cor do candidato quando ele supera a
-pesquisa, com intensidade crescente de 1 a 5 p.p. UFs com menos de 2% do próprio eleitorado apurado aparecem sem cor.
+pesquisa, com intensidade crescente de 0,5 a 4 p.p. (4 p.p. ou mais = cor máxima). Estados agrupados por região e
+ordenados pelo voto no PT no 1º turno de 2022; ao lado, a barra do % do eleitorado da UF já apurado. A comparação não
+avalia as pesquisas: a urna reflete também a migração de voto final e a abstenção, que a pesquisa (mesmo no cenário de
+eleitor provável) capta pouco. UFs com menos de 2% do próprio eleitorado apurado aparecem sem cor.
 No replay de 2022, com 31% do eleitorado nacional apurado, o erro absoluto médio da projeção por UF foi de 0,6 p.p.
 (PT e PL), com 5 UFs acima de 1 p.p. Diferenças de 1–2 p.p. para a pesquisa estão, portanto, dentro do erro da projeção
 no começo da noite.

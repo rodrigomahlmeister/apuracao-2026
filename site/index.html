@@ -38,10 +38,14 @@
     </details>
 
     <details class="tabela" id="estados" hidden>
-      <summary>Desempenho das pesquisas por estado</summary>
+      <summary>Diferença entre a urna e a pesquisa em cada estado</summary>
       <p class="nota-estados">Projeção do resultado final em cada estado (% dos votos válidos) e, entre parênteses, a diferença
-        para a média das últimas pesquisas no estado, em pontos percentuais. Quanto mais o candidato supera a pesquisa, mais
-        forte a cor. Estados com menos de 2% do eleitorado apurado aparecem em cinza claro.</p>
+        em pontos percentuais para a última pesquisa Quaest no estado, no cenário de eleitor provável.</p>
+      <p class="nota-estados">Esta comparação não avalia o desempenho das pesquisas. O resultado da urna reflete também a
+        migração de voto nos últimos dias e quem de fato foi votar, algo sobre o qual a pesquisa diz pouco. O cenário de
+        eleitor provável tenta incorporar a abstenção, mas é uma estimativa difícil de verificar.</p>
+      <p class="nota-estados nota-demo" id="nota-estados-demo" hidden>Demonstração: pesquisas fictícias, só para mostrar as cores.</p>
+      <div class="legenda-estados" id="legenda-estados"></div>
       <div class="tabela-rolagem sem-limite"><table id="tabela-estados"></table></div>
     </details>
 
