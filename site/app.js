@@ -279,7 +279,8 @@ function tabela(pontos) {
     const tr = el("tr");
     tr.append(el("td", null, p.t), el("td", null, fmt(p.x, 1)));
     for (const b of BLOCOS) tr.append(el("td", null, fmt(p.apurado[b])));
-    for (const b of BLOCOS) tr.append(el("td", null, p.projecao ? `${fmt(p.projecao[b])} (${fmt(p.faixa[b][0])}–${fmt(p.faixa[b][1])})` : "–"));
+    for (const b of BLOCOS) tr.append(p.projecao ? el("td", null, `${fmt(p.projecao[b])} (${fmt(p.faixa[b][0])}–${fmt(p.faixa[b][1])})`)
+      : p.preliminar ? el("td", "proj-preliminar", fmt(p.preliminar[b])) : el("td", null, "–"));
     tb.append(tr);
   }
   t.append(tb);

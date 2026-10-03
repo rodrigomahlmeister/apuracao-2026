@@ -164,3 +164,5 @@ body {
   .barra { min-width: 36px; }
   .barra-linha { gap: 6px; }
 }
+.tabela td.proj-preliminar { color: var(--texto-3); }
+.nota-tabela { font-size: 13px; color: var(--texto-3); margin: 8px 0 0; }

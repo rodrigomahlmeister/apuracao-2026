@@ -59,7 +59,8 @@ for (T in as.list(instantes)) {
   obs <- m[, c(sum(obs_PT), sum(obs_PL), sum(obs_OU)) / sum(obs_val)]
   na_se <- function(x) if (mostrar) x else rep(NA_real_, length(x))
   serie <- rbind(serie, fx[, .(hora = T, bloco, apurado = obs, proj = na_se(proj), lo = na_se(lo), hi = na_se(hi),
-                               p_2turno = na_se(p_2turno), pestn = pct_apurado)])
+                               p_2turno = na_se(p_2turno), pestn = pct_apurado,
+                               prelim = if (mostrar) NA_real_ else proj)])
   escrever_pagina(serie, "Presidente 2022 (replay)", tn, "replay", traj = traj, preliminar = if (!mostrar) setNames(fx$proj, fx$bloco),
                  estados = projetar_uf(m, attr(fx, "est"), centro), pesq_uf = pesquisas_uf(arq_pesq_uf))
   if (pub) publicar_site(esperar = FALSE)

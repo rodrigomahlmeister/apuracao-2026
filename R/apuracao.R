@@ -53,8 +53,9 @@ publicar <- function(fx, ciclo, m, traj) {
   mostrar <- fx$pct_apurado[1] / 100 >= PAR_MOD$mostrar_a_partir
   na_se <- function(v) if (mostrar) v else rep(NA_real_, length(v))    # projeção só a partir de 2% apurado
   lin <- fx[, .(hora = Sys.time(), rodada = ciclo$rodada, bloco, apurado = obs, proj = na_se(proj), lo = na_se(lo),
-                hi = na_se(hi), p_2turno = na_se(p_2turno), pestn = pct_apurado, pstn = pstn)]
-  serie <<- rbind(if (nrow(serie)) serie[rodada == ciclo$rodada], lin)    # reinício do simulado: série nova
+                hi = na_se(hi), p_2turno = na_se(p_2turno), pestn = pct_apurado, pstn = pstn,
+                prelim = if (mostrar) NA_real_ else proj)]          # projeção preliminar (< 2%), só para a tabela
+  serie <<- rbind(if (nrow(serie)) serie[rodada == ciclo$rodada], lin, fill = TRUE)    # reinício do simulado: série nova
   fwrite(lin, file.path(out, "serie.csv"), append = file.exists(file.path(out, "serie.csv")))
   escrever_pagina(serie, eleicao = eleicao_nome,
                   turno = turno, ambiente = p$ambiente, traj = if (mostrar) traj,
